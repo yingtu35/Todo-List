@@ -1,6 +1,5 @@
-git status
-
- A basic CRUD todo list application
+# Todo List
+A basic CRUD todo list application
 
 ## **Todo-List** app let you write down things to do.
 

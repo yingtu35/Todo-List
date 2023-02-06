@@ -24,8 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# make some changes
-
 @app.get("/", tags=["root"])
 async def read_root() -> dict:
     return {"message": "Hello World."}
@@ -87,6 +85,7 @@ def delete_user(id: int, body: schemas.UserDelete, db: Session = Depends(get_db)
     username = body.username
     password = body.password
 
+    # TODO: should check user based on their tokens or session cookie
     db_admin = crud.get_admin(db)
     _, db_user = crud.verify_user(db, username, password)
     if db_user is None or db_admin.id != db_user.id:
@@ -105,6 +104,7 @@ def update_user(id: int, body: schemas.UserUpdate, db: Session = Depends(get_db)
     new_username = body.new_username
     password = body.password
 
+    # TODO: should check user based on their tokens or session cookie
     isVerified, db_user = crud.verify_user(db, username, password)
     if not isVerified or db_user.id != id:
         raise HTTPException(status_code=403, detail="Unauthorized")
@@ -139,9 +139,25 @@ def user_login(body: schemas.UserLogin, db: Session = Depends(get_db)):
     if not isVerified:
         raise HTTPException(status_code=400, detail="Invalid username or password")
 
+    crud.update_is_active(db, user, True)
     user_id = user.id
 
     return {"username": username, "user_id": user_id}
 
-# TODO: logout set user's is_active to false
-# @app.post("/logout") 
+@app.post("/logout", tags=["users"], status_code=status.HTTP_200_OK) 
+def user_logout(body: schemas.UserLogout, db: Session = Depends(get_db)):
+    username = body.username
+    queryset = db.query(models.User).filter(models.User.username == username)
+    if queryset.count() == 0:
+        return HTTPException(status_code=400, detail="Invalid username")
+
+    # TODO: should check user based on their tokens or session cookie
+    db_user = queryset.first()
+
+    crud.update_is_active(db, db_user, False)
+    return
+
+    
+
+
+

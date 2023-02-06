@@ -81,7 +81,8 @@ function HomePage(props) {
                         </Collapse>
                         <FormControl>
                             <FormLabel>Username</FormLabel>
-                            <Input type='text' 
+                            <Input type='text'
+                                   autoFocus 
                                    value={username}
                                    placeholder="Username" 
                                    bg={inputBg[colorMode]} 

@@ -40,6 +40,9 @@ class UserUpdate(UserBase):
 class UserLogin(UserBase):
     password: str
 
+class UserLogout(UserBase):
+    pass
+
 class User(UserBase):
     id: str
     email: str

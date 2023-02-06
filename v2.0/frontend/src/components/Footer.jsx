@@ -1,7 +1,13 @@
 import React from "react"
-import { Box, Text, Link } from "@chakra-ui/react"
+import {FaGithub, FaFacebook, FaLinkedin, FaInstagram} from "react-icons/fa"
+import { Box, Text, Button } from "@chakra-ui/react"
 
 function Footer() {
+
+    function handleClick(href) {
+        window.location.href = href;
+    }
+
     return (
         <Box 
             position="fixed"
@@ -12,14 +18,26 @@ function Footer() {
             p={4}
             textAlign="center"
         >
-            <Text>v2.0</Text>
-            <Text>Follow Ying Tu on:</Text>
-            <Link href='https://github.com/yingtu35' color="blue" isExternal mr={1}>
-                GitHub
-            </Link>
-            <Link href='https://www.linkedin.com/in/yingtu/' color="blue" isExternal>
-                Linkedin
-            </Link>
+            <Text>Copyright © 2023 Ying Tu. All rights reserved</Text>
+            <Button variant="ghost"
+                    onClick={() => handleClick("https://github.com/yingtu35")}>
+                <FaGithub size="24px" />
+            </Button>
+            <Button colorScheme="linkedin"
+                    variant="ghost"
+                    onClick={() => handleClick("https://www.linkedin.com/in/ying-tu-06b208102/")}>
+                <FaLinkedin size="24px" />
+            </Button>
+            <Button colorScheme="facebook"
+                    variant="ghost"
+                    onClick={() => handleClick("https://www.facebook.com/profile.php?id=100000582214483")}>
+                <FaFacebook size="24px" />
+            </Button>
+            <Button colorScheme="pink"
+                    variant="ghost"
+                    onClick={() => handleClick("https://www.instagram.com/orevo860305/")}>
+                <FaInstagram size="24px" />
+            </Button>
         </Box>
     )
 }

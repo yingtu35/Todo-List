@@ -1,23 +1,26 @@
 import React, { useState } from "react"
-import { Flex, Box, ButtonGroup, Button, Input, Stack, useColorMode, Heading } from "@chakra-ui/react"
+import { Flex, Box, ButtonGroup, Button, Input, Stack, useColorMode, Heading, Collapse, Alert, AlertDescription } from "@chakra-ui/react"
 import { useNavigate } from "react-router-dom";
 import { FormControl, FormLabel, FormHelperText } from "@chakra-ui/react";
 
 function HomePage(props) {
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [emailError, setEmailError] = useState(false);
+    const [usernameError, setUsernameError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
+
+    const [loginError, setLoginError] = useState(false);
+    const [loginMsg, setLoginMsg] = useState("");
 
     const { colorMode, toggleColorMode } = useColorMode();
     const boxBg = { light: "gray.100", dark: "gray.400"}
     const inputBg = { light: "gray.200", dark: "gray.600" };
 
     async function handleLogin(){
-        if (email === "") {
-            setEmailError(true);
+        if (username === "") {
+            setUsernameError(true);
             return;
         }
         if (password === "") {
@@ -29,20 +32,20 @@ function HomePage(props) {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
-                "email": email,
+                "username": username,
                 "password": password,
             }),
         }
         
-        const response = await fetch("http://localhost:8000/user/login", requestOptions);
+        const response = await fetch("http://localhost:8000/login", requestOptions);
         if (response.ok){
             const data = await response.json();
-            props.loginCallback(data.user_id);
+            props.loginCallback(data);
             navigate("/");
         }else {
-            // TODO: Display error message to the screen
             const data = await response.json();
-            console.log(data.detail);
+            setLoginError(true);
+            setLoginMsg(data.detail);
         }
 
     }
@@ -51,10 +54,10 @@ function HomePage(props) {
         navigate("/signup");
     }
 
-    function handleEmailInput(e){
-        setEmail(e.target.value);
-        if (email !== ""){
-            setEmailError(false);
+    function handleUsernameInput(e){
+        setUsername(e.target.value);
+        if (username !== ""){
+            setUsernameError(false);
         }
     }
 
@@ -67,18 +70,23 @@ function HomePage(props) {
 
     return (
         <Box>
-            <Flex align="center" justify="center" h="80vh">
+            <Flex align="center" justify="center" h="75vh">
                 <Box p={5} borderWidth="1px" w="500px" rounded="lg" bg={boxBg[colorMode]}>
                     <Stack spacing={3}>
                         <Heading as='h3' size='lg'>User Login</Heading>
+                        <Collapse in={loginError}>
+                            <Alert status="error">
+                                <AlertDescription>{loginMsg}</AlertDescription>
+                            </Alert>
+                        </Collapse>
                         <FormControl>
-                            <FormLabel>Email</FormLabel>
-                            <Input type='email' 
-                                   value={email}
-                                   placeholder="Email" 
+                            <FormLabel>Username</FormLabel>
+                            <Input type='text' 
+                                   value={username}
+                                   placeholder="Username" 
                                    bg={inputBg[colorMode]} 
-                                   onChange={handleEmailInput} />
-                            {!emailError ? (null) : (<FormHelperText>Email is required.</FormHelperText>)}
+                                   onChange={handleUsernameInput} />
+                            {!usernameError ? (null) : (<FormHelperText>Username is required.</FormHelperText>)}
                         </FormControl>
                         <FormControl>
                             <FormLabel>Password</FormLabel>

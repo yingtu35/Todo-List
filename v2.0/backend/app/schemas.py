@@ -24,16 +24,25 @@ class Todo(TodoBase):
         orm_mode = True
 
 class UserBase(BaseModel):
-    email: str
+    username: str
 
 class UserCreate(UserBase):
+    email: str
+    password: str
+
+class UserDelete(UserBase):
+    password: str
+
+class UserUpdate(UserBase):
+    new_username: str
     password: str
 
 class UserLogin(UserBase):
     password: str
 
 class User(UserBase):
-    id: int
+    id: str
+    email: str
     todos: List[Todo]
 
     class Config:

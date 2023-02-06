@@ -30,7 +30,7 @@ function Addtodo(props) {
                 }),
             }
 
-            await fetch("http://localhost:8000/item", requestOptions);
+            await fetch(`http://localhost:8000/items/user/${userId}`, requestOptions);
             getCurrentTodos();
             setItem("");
         }
@@ -88,7 +88,7 @@ function Todo(props){
                 }),
             }
 
-            await fetch(`http://localhost:8000/item/${id}`, requestOptions);
+            await fetch(`http://localhost:8000/items/${id}`, requestOptions);
             getCurrentTodos();
             onClose();
         }
@@ -103,7 +103,7 @@ function Todo(props){
             }),
         }
 
-        await fetch(`http://localhost:8000/item/${id}`, requestOptions);
+        await fetch(`http://localhost:8000/items/${id}`, requestOptions);
         getCurrentTodos();
     }
 
@@ -145,20 +145,14 @@ function Todo(props){
 }
 
 function Todos(props){
-    const navigate = useNavigate();
 
     const [todos, setTodos] = useState([]);
     const [userId, setUserId] = useState(props.userId || -1);
 
     async function getCurrentTodos() {
-        const response = await fetch(`http://localhost:8000/item/${userId}`);
+        const response = await fetch(`http://localhost:8000/items/user/${userId}`);
         const data = await response.json();
         setTodos(data.todos);
-    }
-
-    function handleLogOut() {
-        props.logOutCallback();
-        navigate('/login');
     }
 
     useEffect(() => {
@@ -167,8 +161,6 @@ function Todos(props){
 
     return (
         <TodosContext.Provider value={{todos, getCurrentTodos}}>
-            {/* // TODO: Display user information and log out button in the header, not here */}
-            <Button colorScheme="red" onClick={handleLogOut}>Log out</Button>
             <Addtodo userId={userId} />
             <Stack spacing={4} mt={1}>
                 {todos.map((element) => (

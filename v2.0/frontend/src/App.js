@@ -1,6 +1,7 @@
 import './App.css';
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate} from "react-router-dom";
+import Header from './components/Header'
 import Title from './components/Title';
 import Footer from './components/Footer';
 import HomePage from './components/HomePage';
@@ -10,29 +11,32 @@ import Todos from './components/Todos';
 
 
 function App() {
+  const [username, setUsername] = useState('');
   const [userId, setUserId] = useState('');
 
-  function loginCallback(id) {
-    setUserId(id);
-    // console.log(id);
+  function loginCallback(data) {
+    setUserId(data.user_id);
+    setUsername(data.username);
   }
 
   function logOutCallback() {
     setUserId("");
+    setUsername("");
   }
 
-  function signUpCallback(id) {
-    setUserId(id);
+  function signUpCallback(data) {
+    setUserId(data.user_id);
+    setUsername(data.username);
   }
 
   return (
     <Box>
-      {/* TODO: Create a Header page that includes user information, login, logout button */}
-      <Title />
       <Router>
+        <Header username={username} logOutCallback={logOutCallback}/>
+        <Title />
         <Routes>
-          <Route path="/" element={userId ? <Todos userId={userId} logOutCallback={logOutCallback} /> : <HomePage loginCallback={loginCallback} />}/>
-          <Route path="/login" element={userId ? <Todos userId={userId} logOutCallback={logOutCallback} /> : <HomePage loginCallback={loginCallback} />}/>
+          <Route path="/" element={userId ? <Todos userId={userId} /> : <HomePage loginCallback={loginCallback} />}/>
+          <Route path="/login" element={userId ? <Todos userId={userId} /> : <HomePage loginCallback={loginCallback} />}/>
           <Route path="/signup" element={<SignUp signUpCallback={signUpCallback}/>}/>
           <Route path="*" element={<Navigate to={"/"} />} />
         </Routes>

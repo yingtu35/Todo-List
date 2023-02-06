@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Flex, Box, Heading, ButtonGroup, Button, Input, Stack, useColorMode } from "@chakra-ui/react"
+import { Flex, Box, Heading, ButtonGroup, Button, Input, Stack, useColorMode, Collapse, Alert, AlertDescription } from "@chakra-ui/react"
 import { FormControl, FormLabel, FormHelperText } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
@@ -12,19 +12,25 @@ function SignUp(props) {
     const [usernameError, setUsernameError] = useState(false);
     const [emailError, setEmailError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
+
+    const [signupError, setSignupError] = useState(false);
+    const [signupMsg, setSignupMsg] = useState('');
     
     const { colorMode, toggleColorMode } = useColorMode();
     const boxBg = { light: "gray.100", dark: "gray.400"};
     const inputBg = { light: "gray.200", dark: "gray.600" };
 
     async function handleSignUp() {
-        // TODO: send a post request to create new user
-        if (email === "") {
-            setEmailError(true);
-            return;
-        }
-        if (password === "") {
-            setPasswordError(true);
+        if (username === "" || email === "" || password === ""){
+            if (username === "") {
+                setUsernameError(true);
+            }
+            if (email === "") {
+                setEmailError(true);
+            }
+            if (password === "") {
+                setPasswordError(true);
+            }
             return;
         }
 
@@ -32,23 +38,21 @@ function SignUp(props) {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
+                "username": username,
                 "email": email,
                 "password": password,
             }),
         }
         
-        const response = await fetch("http://localhost:8000/user/create", requestOptions);
+        const response = await fetch("http://localhost:8000/Sign-up", requestOptions);
         if (response.ok){
             const data = await response.json();
-            // // TODO: navigate to "/" send a callback to set userId
-            // setUserId(data.user_id);
-            // setIsLogin(true);
-            props.signUpCallback(data.user_id);
+            props.signUpCallback(data);
             navigate("/");
         }else {
-            // TODO: Display error information to the user
             const data = await response.json();
-            console.log(data.detail);
+            setSignupError(true);
+            setSignupMsg(data.detail);
         }
         return;
     }
@@ -84,15 +88,11 @@ function SignUp(props) {
             <Box p={5} borderWidth="1px" w="500px" rounded="lg" bg={boxBg[colorMode]}>
                 <Stack spacing={3}>
                     <Heading as='h3' size='lg'>User Sign Up</Heading>
-                    <FormControl>
-                        <FormLabel>Username</FormLabel>
-                        <Input type='text' 
-                                value={username}
-                                placeholder="Username" 
-                                bg={inputBg[colorMode]} 
-                                onChange={handleUsernameInput} />
-                        {!usernameError ? (null) : (<FormHelperText>Username is required.</FormHelperText>)}
-                    </FormControl>
+                    <Collapse in={signupError}>
+                        <Alert status="error">
+                            <AlertDescription>{signupMsg}</AlertDescription>
+                        </Alert>
+                    </Collapse>
                     <FormControl>
                         <FormLabel>Email</FormLabel>
                         <Input type='email' 
@@ -101,6 +101,15 @@ function SignUp(props) {
                                 bg={inputBg[colorMode]} 
                                 onChange={handleEmailInput} />
                         {!emailError ? (null) : (<FormHelperText>Email is required.</FormHelperText>)}
+                    </FormControl>
+                    <FormControl>
+                        <FormLabel>Username</FormLabel>
+                        <Input type='text' 
+                                value={username}
+                                placeholder="Username" 
+                                bg={inputBg[colorMode]} 
+                                onChange={handleUsernameInput} />
+                        {!usernameError ? (null) : (<FormHelperText>Username is required.</FormHelperText>)}
                     </FormControl>
                     <FormControl>
                         <FormLabel>Password</FormLabel>

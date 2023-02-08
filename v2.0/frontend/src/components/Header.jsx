@@ -2,7 +2,7 @@ import React from "react"
 import pic from "../images/logo.png"
 import { useNavigate } from "react-router-dom";
 import { MdAccountCircle, MdEmail, MdOutlineLightMode, MdOutlineNightlight } from "react-icons/md"
-import { Menu, MenuButton, MenuList, MenuItem, MenuDivider, Button, ButtonGroup, Flex, Text, Image, useColorMode} from "@chakra-ui/react"
+import { Menu, MenuButton, MenuList, MenuItem, MenuDivider, Button, ButtonGroup, Flex, Text, Image, useColorMode, Heading} from "@chakra-ui/react"
 
 function Header(props) {
     const navigate = useNavigate();
@@ -16,10 +16,13 @@ function Header(props) {
     }
 
     return (
-        <Flex style={{ display: "grid", justifySelf: "end", padding: "10px" }} bg={flexBg[colorMode]}>
-            {/* TODO: Adjust the alignment of Image and ButtonGroup, and move the title to the header */}
-            <Image boxSize="50px" src={pic} alt="todo-list logo" />
-            <ButtonGroup justifyContent="right">
+        <Flex p="10px" justify="space-between" bg={flexBg[colorMode]} alignItems="center">
+            <Flex alignItems="stretch">
+                <Image boxSize="50px" src={pic} alt="todo-list logo" />
+                <Heading ml={1}>Todo List</Heading>
+                <Text ml={1}>v2.0</Text>
+            </Flex>
+            <ButtonGroup >
                 {colorMode === "dark" ?
                 <Button size="md" 
                         leftIcon={<MdOutlineNightlight />} 

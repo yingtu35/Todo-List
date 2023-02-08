@@ -2,7 +2,6 @@ import './App.css';
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate} from "react-router-dom";
 import Header from './components/Header'
-import Title from './components/Title';
 import Footer from './components/Footer';
 import HomePage from './components/HomePage';
 import SignUp from './components/SignUp';
@@ -33,7 +32,6 @@ function App() {
     <Box>
       <Router>
         <Header username={username} logOutCallback={logOutCallback}/>
-        <Title />
         <Routes>
           <Route path="/" element={userId ? <Todos userId={userId} /> : <HomePage loginCallback={loginCallback} />}/>
           <Route path="/login" element={userId ? <Todos userId={userId} /> : <HomePage loginCallback={loginCallback} />}/>

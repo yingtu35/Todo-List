@@ -71,3 +71,8 @@ def update_is_active(db: Session, user: User, is_active: bool):
     user.is_active = is_active
     db.commit()
     return
+
+"""OAuth2"""
+def get_user(db: Session, username) -> User:
+    db_user = db.query(User).filter(User.username == username).first()
+    return db_user

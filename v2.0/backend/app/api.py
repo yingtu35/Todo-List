@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from .utils import hash_password, verify_password
 
 from fastapi import Cookie, Response
+from .models import User
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -22,7 +23,7 @@ app = FastAPI()
 
 origins=[
     "http://localhost:3000",
-    "localhost:3000"
+    "localhost:3000",
 ]
 
 # To allow cross-origin request
@@ -34,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 @app.get("/", tags=["root"])
 async def read_root() -> dict:
@@ -143,18 +144,28 @@ def create_user(body: schemas.UserCreate, db: Session = Depends(get_db)):
     return {"username": username, "user_id": user_id}
 
 @app.post("/login", tags=["users"], status_code=status.HTTP_200_OK)
-def user_login(body: schemas.UserLogin, db: Session = Depends(get_db)):
-    username = body.username
-    password = body.password
+async def user_login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    username = form_data.username
+    password = form_data.password
 
-    isVerified, user = crud.verify_user(db, username, password)
-    if not isVerified:
-        raise HTTPException(status_code=400, detail="Invalid username or password")
-
+    user = crud.verify_user(db, username, password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     crud.update_is_active(db, user, True)
-    user_id = user.id
 
-    return {"username": username, "user_id": user_id}
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    response.set_cookie(key="token", value=access_token, max_age=60*ACCESS_TOKEN_EXPIRE_MINUTES, httponly=True, secure=True, samesite=None)
+    return {"username": username, 
+            "user_id": user.id, 
+            "access_token": access_token, 
+            "token_type": "bearer"}
 
 @app.post("/logout", tags=["users"], status_code=status.HTTP_200_OK) 
 def user_logout(body: schemas.UserLogout, db: Session = Depends(get_db)):
@@ -169,10 +180,36 @@ def user_logout(body: schemas.UserLogout, db: Session = Depends(get_db)):
     crud.update_is_active(db, db_user, False)
     return
 
+async def current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = db.query(User).filter(User.username == token_data.username).first()
+    return user
+
+async def current_active_user(active_user: User = Depends(current_user)):
+    if not active_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return active_user
+
+@app.get("/test/user")
+async def read_user(user: User = Depends(current_active_user)):
+    return user
+
 """Cookie test"""
 @app.get("/set")
 async def set_cookie(response: Response):
-    response.set_cookie(key="refresh_token", value="username", max_age=300)
+    response.set_cookie(key="refresh_token", value="hi", max_age=300)
     return True
 
 @app.get("/get")
@@ -183,7 +220,6 @@ async def get_cookie(refresh_token: Optional[str] = Cookie(None)):
 
 """ OAuth2 Authentication and Authorization"""
 # tokenUrl is the URL the client use to send username and password to get a token
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

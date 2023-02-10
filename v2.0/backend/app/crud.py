@@ -56,12 +56,10 @@ def post_user(db: Session, username: str, email: str, password: str):
 def verify_user(db: Session, username: str, password: str):
     db_user = db.query(User).filter(User.username == username).first()
     if db_user is None:
-        return (False, None)
-    
-    hashed_password = db_user.hashed_password
-    if not verify_password(password, hashed_password):
-        return (False, None)
-    return (True, db_user)
+        return False
+    if not verify_password(password, db_user.hashed_password):
+        return False
+    return db_user
 
 def get_admin(db: Session) -> User:
     db_admin = db.query(User).filter(User.id == 1).first()

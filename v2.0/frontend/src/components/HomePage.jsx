@@ -28,24 +28,28 @@ function HomePage(props) {
             return;
         }
 
+        const data = {
+            gran_type: "password",
+            username: username,
+            password: password,
+        }
         const requestOptions = {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                "username": username,
-                "password": password,
-            }),
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: new URLSearchParams(data).toString(),
         }
         
         const response = await fetch("http://localhost:8000/login", requestOptions);
         if (response.ok){
             const data = await response.json();
-            props.loginCallback(data);
-            navigate("/");
+            console.log(data);
+            // props.loginCallback(data);
+            // navigate("/");
         }else {
             const data = await response.json();
-            setLoginError(true);
-            setLoginMsg(data.detail);
+            console.log(data);
+            // setLoginError(true);
+            // setLoginMsg(data.detail);
         }
 
     }
@@ -66,6 +70,13 @@ function HomePage(props) {
         if (password !== ""){
             setPasswordError(false);
         }
+    }
+
+    // TODO: Temporary button, delete after test
+    async function handleGetUser(){
+        const response = await fetch("http://localhost:8000/test")
+        const data = await response.json();
+        console.log(data);
     }
 
     return (
@@ -99,6 +110,8 @@ function HomePage(props) {
                             {!passwordError ? (null) : (<FormHelperText>Password is required.</FormHelperText>)}
                         </FormControl>
                         <ButtonGroup justifyContent="right">
+                            {/* Temporary getUser Button, should be deleted after test */}
+                            <Button onClick={handleGetUser}>GetUser</Button>
                             <Button colorScheme="cyan" 
                                     onClick={handleLogin}>Login</Button>
                             <Button colorScheme="green" onClick={handleSignUp}>Sign up</Button>

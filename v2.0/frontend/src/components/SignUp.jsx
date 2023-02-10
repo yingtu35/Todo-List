@@ -47,8 +47,8 @@ function SignUp(props) {
         const response = await fetch("http://localhost:8000/Sign-up", requestOptions);
         if (response.ok){
             const data = await response.json();
-            props.signUpCallback(data);
-            navigate("/");
+            // props.signUpCallback(data);
+            // navigate("/");
         }else {
             const data = await response.json();
             setSignupError(true);

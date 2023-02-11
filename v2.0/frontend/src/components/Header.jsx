@@ -11,6 +11,7 @@ function Header(props) {
     const flexBg = { light: "gray.400", dark: "gray.600"};
     const buttonBg = { light: "gray.400", dark: "gray.600" }
     function handleLogOut() {
+        localStorage.removeItem("token");
         props.logOutCallback();
         navigate('/login');
     }

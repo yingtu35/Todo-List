@@ -43,12 +43,12 @@ function SignUp(props) {
                 "password": password,
             }),
         }
-        
-        const response = await fetch("http://localhost:8000/Sign-up", requestOptions);
+        // TODO: should redirect to login page and let user login again to get the token
+        const response = await fetch("http://localhost:8000/signup", requestOptions);
         if (response.ok){
             const data = await response.json();
-            // props.signUpCallback(data);
-            // navigate("/");
+            props.signUpCallback(data);
+            navigate("/");
         }else {
             const data = await response.json();
             setSignupError(true);

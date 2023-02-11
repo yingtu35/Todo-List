@@ -6,13 +6,11 @@ class TodoBase(BaseModel):
     item: str
 
 class TodoCreate(TodoBase):
-    owner_id: int
+    pass
 
 class TodoUpdate(TodoBase):
-    owner_id: int
+    pass
 
-class TodoDelete(BaseModel):
-    owner_id: int
 
 class Todo(TodoBase):
     id: int
@@ -34,8 +32,8 @@ class UserDelete(UserBase):
     password: str
 
 class UserUpdate(UserBase):
-    new_username: str
     password: str
+    new_password: str
 
 class UserLogin(UserBase):
     password: str

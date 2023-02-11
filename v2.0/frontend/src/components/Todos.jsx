@@ -2,7 +2,6 @@ import React, { useRef } from "react"
 import { Box, Input, Button, InputGroup, Stack, Text, ButtonGroup, useDisclosure, FormControl, FormLabel, FormHelperText, FormErrorMessage } from "@chakra-ui/react"
 import { Modal, ModalOverlay, ModalHeader, ModalCloseButton, ModalContent, ModalBody, ModalFooter} from "@chakra-ui/react"
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
 
 const TodosContext = React.createContext({
     todos: [],
@@ -10,7 +9,6 @@ const TodosContext = React.createContext({
 })
 
 function Addtodo(props) {
-    const [userId, setUserId] = useState(props.userId || null);
     const [item, setItem] = useState("")
     const [isError, setIsError] = useState(false);
     const {todos, getCurrentTodos} = React.useContext(TodosContext)
@@ -21,16 +19,18 @@ function Addtodo(props) {
     }
     async function handleSubmit() {
         if (item) {
+            const token = localStorage.getItem("token");
             const requestOptions = {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: {
+                    "Content-Type": "application/json", 
+                    "Authorization": "Bearer " + token},
                 body: JSON.stringify({
                     "item": item,
-                    "owner_id": userId,
                 }),
             }
 
-            await fetch(`http://localhost:8000/items/user/${userId}`, requestOptions);
+            await fetch(`http://localhost:8000/items`, requestOptions);
             getCurrentTodos();
             setItem("");
         }
@@ -56,14 +56,11 @@ function Addtodo(props) {
                 <FormHelperText>
                     Input is required.
                 </FormHelperText>
-            )
-            : (
+            ) : (
                 <FormHelperText>
                     Write down what to do.
                 </FormHelperText>
-            )
-            }
-            
+            )}
         </FormControl>
             
     )
@@ -72,19 +69,20 @@ function Addtodo(props) {
 function Todo(props){
     const [id, setId] = useState(props.id || null);
     const [item, setItem] = useState(props.item || null);
-    const [userId, setUserId] = useState(props.userId || null);
     const {todos, getCurrentTodos} = React.useContext(TodosContext);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const inputRef = useRef();
 
     async function handleUpdate(){
         if (inputRef.current.value) {
+            const token = localStorage.getItem("token");
             const requestOptions = {
                 method: "PUT",
-                headers: {"Content-Type": "application/json"},
+                headers: {
+                    "Content-Type": "application/json", 
+                    "Authorization": "Bearer " + token},
                 body: JSON.stringify({
                     "item": inputRef.current.value,
-                    "owner_id": userId
                 }),
             }
 
@@ -95,12 +93,11 @@ function Todo(props){
     }
 
     async function handleDelete(){
+        const token = localStorage.getItem("token");
         const requestOptions = {
             method: "DELETE",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                "owner_id": userId
-            }),
+            headers: {"Content-Type": "application/json",
+                "Authorization": "Bearer " + token},
         }
 
         await fetch(`http://localhost:8000/items/${id}`, requestOptions);
@@ -147,10 +144,14 @@ function Todo(props){
 function Todos(props){
 
     const [todos, setTodos] = useState([]);
-    const [userId, setUserId] = useState(props.userId || -1);
 
     async function getCurrentTodos() {
-        const response = await fetch(`http://localhost:8000/items/user/${userId}`);
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:8000/items`, {
+            method: "GET",
+            headers: {"accept": "application/json", 
+                    "Authorization": "Bearer " + token}
+        });
         const data = await response.json();
         setTodos(data.todos);
     }
@@ -161,11 +162,14 @@ function Todos(props){
 
     return (
         <TodosContext.Provider value={{todos, getCurrentTodos}}>
-            <Addtodo userId={userId} />
+            <Addtodo />
             <Stack spacing={4} mt={1}>
-                {todos.map((element) => (
-                    <Todo id={element.id} item={element.item} userId={userId} />
-                ))}
+                {todos?
+                    todos.map((element) => (
+                    <Todo id={element.id} item={element.item} />
+                )) : 
+                null
+                }
             </Stack>
         </TodosContext.Provider>
     )

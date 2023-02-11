@@ -42,14 +42,15 @@ function HomePage(props) {
         const response = await fetch("http://localhost:8000/login", requestOptions);
         if (response.ok){
             const data = await response.json();
-            console.log(data);
-            // props.loginCallback(data);
-            // navigate("/");
+            // console.log(data);
+            localStorage.setItem("token", data.access_token);
+            props.loginCallback(data);
+            navigate("/");
         }else {
             const data = await response.json();
-            console.log(data);
-            // setLoginError(true);
-            // setLoginMsg(data.detail);
+            // console.log(data);
+            setLoginError(true);
+            setLoginMsg(data.detail);
         }
 
     }
@@ -74,7 +75,12 @@ function HomePage(props) {
 
     // TODO: Temporary button, delete after test
     async function handleGetUser(){
-        const response = await fetch("http://localhost:8000/test")
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:8000/test/user", {
+            method: "GET",
+            headers: {"accept": "application/json", 
+                    "Authorization": "Bearer " + token}
+        })
         const data = await response.json();
         console.log(data);
     }

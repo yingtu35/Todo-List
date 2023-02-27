@@ -46,7 +46,7 @@ function App() {
   })
 
   return (
-    <Box>
+    <Box className='container'>
       <Router>
         <Header username={username} logOutCallback={logOutCallback}/>
         <Routes>

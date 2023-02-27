@@ -46,6 +46,7 @@ function Addtodo(props) {
                 <Input 
                     type="text"
                     placeholder="Enter here"
+                    width="30%"
                     value={item}
                     autoFocus={true}
                     onChange={handleInput}
@@ -157,21 +158,24 @@ function Todos(props){
     }
 
     useEffect(() => {
-      getCurrentTodos()
+      getCurrentTodos();
     }, [])
 
     return (
-        <TodosContext.Provider value={{todos, getCurrentTodos}}>
-            <Addtodo />
-            <Stack spacing={4} mt={1}>
-                {todos?
-                    todos.map((element) => (
-                    <Todo id={element.id} item={element.item} />
-                )) : 
-                null
-                }
-            </Stack>
-        </TodosContext.Provider>
+        <Box className="todos-container">
+            <TodosContext.Provider value={{todos, getCurrentTodos}}>
+                <Addtodo />
+                <Stack spacing={4} mt={1}>
+                    {todos?
+                        todos.map((element) => (
+                        <Todo id={element.id} item={element.item} />
+                    )) : 
+                    null
+                    }
+                </Stack>
+            </TodosContext.Provider>
+        </Box>
+        
     )
 }
 
